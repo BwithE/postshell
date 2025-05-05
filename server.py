@@ -139,21 +139,18 @@ def client_terminal(client_id):
 @app.route('/client/<client_id>/delete', methods=['POST'])
 def delete_client(client_id):
     if client_id in clients:
-        # Send exit command to the client
+        # send exit command to the client
         command_queue[client_id].append('exit')
         
-        # Clean up the client information
+        # clean up the client information
         clients.pop(client_id, None)
         command_queue.pop(client_id, None)
 
-        # Remove history file
+        # remove history file
         try:
             os.remove(os.path.join(HISTORY_DIR, f'{client_id}.log'))
         except FileNotFoundError:
             pass
-        
-        # You can optionally terminate the client process here by killing it if necessary
-        # However, the client should handle the "exit" command and stop itself
 
     return redirect(url_for('dashboard'))
 
