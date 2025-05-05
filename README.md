@@ -18,7 +18,7 @@ python3 server.py <port>
 ```
 
 2. Modify, then transfer a client.<script> to connect to the SERVER
-- Change IP, PORT, and CHECKIN time
+  - Change IP, PORT, and CHECKIN time
 
 3. Execute the script on the client
 ```
@@ -34,7 +34,7 @@ powershell -ep bypass client.ps1
 <img width="1409" alt="Screenshot 2025-05-04 at 8 50 21 PM" src="https://github.com/user-attachments/assets/965f1c5b-4d10-4d2a-949e-5d8546c8af58" />
 
 5. Execute commands, and wait for the client to GET the command, then POST the results
-- `server.py` can be modified to allow more than 2 commands to be kept in the webpage history
+  - `server.py` can be modified to allow more than 2 commands to be kept in the webpage history
 
 <img width="580" alt="Screenshot 2025-05-04 at 8 50 47 PM" src="https://github.com/user-attachments/assets/bb562d5f-2f77-41aa-ba09-85a955eddbf2" />
 
