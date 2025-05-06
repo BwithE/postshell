@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+<head>
+    <title>Client Console - {{ client_id }}</title>
+    <style>
+        body { 
+            background: #000; 
+            color: #0f0; 
+            font-family: monospace; /* Consistent font family */
+            font-size: 18px; /* Same font size as in the dashboard */
+            padding: 20px; 
+        }
+
+        .output-container {
+            max-height: 500px;
+            overflow-y: scroll;
+            border: 1px solid #0f0;
+            background: #111;
+            padding: 10px;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+            font-size: 18px; /* Consistent font size for output */
+        }
+
+        .entry { margin-bottom: 8px; }
+        .entry span.cmd { color: #0f0; font-size: 18px; } /* Consistent font size for command */
+        
+        input[type="text"] {
+            width: 100%;
+            background: #111;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 10px; /* Increased padding for better input size */
+            margin-bottom: 10px;
+            font-size: 18px; /* Consistent font size for input field */
+        }
+
+        h2 {
+            font-size: 28px; /* Same as the dashboard title */
+        }
+    </style>
+    <script>
+        let lastFetchedTimestamp = 0;
+
+        function fetchUpdates() {
+            fetch("/client/{{ client_id }}/updates")
+                .then(response => response.text())
+                .then(html => {
+                    const outputContainer = document.getElementById("output");
+                    // Check if the content has changed since the last fetch (to avoid unnecessary updates)
+                    if (html.trim() !== outputContainer.innerHTML.trim()) {
+                        outputContainer.innerHTML = html;
+                        outputContainer.scrollTop = outputContainer.scrollHeight;  // Scroll to bottom
+                    }
+                });
+        }
+
+        // Only fetch updates after a command is submitted or if the results have changed
+        setInterval(fetchUpdates, 3000);  // Keep the polling interval reasonable (3 seconds)
+    </script>
+</head>
+<body>
+    <div style="margin-bottom: 10px;">
+        <a href="/" style="color:#0f0; text-decoration:none;">&larr; Back to Dashboard</a>
+    </div>
+
+    <h2>$ Terminal - {{ client_id }}</h2>
+
+    <form method="POST">
+        <input type="text" name="cmd" placeholder="Enter command" autofocus>
+    </form>
+
+    <div id="output" class="output-container">
+        {% for cmd, result in history %}
+            <div class="entry">
+                <span class="cmd">{{ cmd }}</span><br>{{ result }}
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
