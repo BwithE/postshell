@@ -21,7 +21,7 @@ git clone https://github.com/bwithe/postshell
 # Usage
 1. To start the server
 ```
-python3 server.py <port>
+python3 postshell.py <port>
 ```
 
 2. Modify the followinng, then transfer a client.<script> to connect to the SERVER
