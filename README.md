@@ -24,7 +24,7 @@ git clone https://github.com/bwithe/postshell
 python3 postshell.py <port>
 ```
 
-2. Modify the followinng, then transfer a client.<script> to connect to the SERVER
+2. Modify the following, then transfer a client.<script> to connect to the SERVER
   - IP
   - PORT
   - WAITTIME
