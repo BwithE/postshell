@@ -10,7 +10,7 @@ Execute commands on clients using GET/POST requests. (Bypass Firewalls for initi
 
 There are some limitations, however, can be very useful if firewall is blocking standard reverse shells.
 
-How post shell works:
+How postshell works:
   - Listens for http requests on user specified port
   - Client scripts connect to the server using POST requests, submitting machine information
   - Client scripts continue to GET commands from the server, execute the commands, then POST results back to the server 
