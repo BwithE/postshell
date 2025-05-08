@@ -12,6 +12,7 @@ There are some limitations, however, can be very useful if firewall is blocking 
 
 How postshell works:
   - Listens for http requests on user specified port
+  - Generates a web request payload (.sh, .py, .ps1)
   - Client scripts connect to the server using POST requests, submitting machine information
   - Client scripts continue to GET commands from the server, execute the commands, then POST results back to the server 
 
