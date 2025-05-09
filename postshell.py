@@ -404,7 +404,7 @@ def generate_payload():
     lhost = payload_settings["lhost"]
     lport = payload_settings["lport"]
     payload_type = payload_settings["payload"]
-    waittime = payload_settings.get("checkin", 1)  # Default to 1 second if not set
+    waittime = payload_settings.get("checkin", 1)  # defaults to 1 second if not set
 
     if not os.path.exists("tools"):
         os.makedirs("tools")
