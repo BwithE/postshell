@@ -17,7 +17,7 @@ How postshell works:
   - Client scripts continue to GET commands from the server, execute the commands, then POST results back to the server 
 
 # Disclaimer
-This is not meant to be used for illegal purposes. Please use on your own machines, or with permission.
+This is only for testing purposes, not intended for anything illegal.
 
 # Getting Started
 1. Download POSTSHELL
