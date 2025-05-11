@@ -6,7 +6,7 @@
 ██║     ╚██████╔╝███████║   ██║   ███████║██║  ██║███████╗███████╗███████╗
 ╚═╝      ╚═════╝ ╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝
 ```
-Execute commands on clients using GET/POST requests. (Bypass Firewalls for initial access)
+Execute commands on clients using GET/POST requests. (Bypass Firewalls)
 
 There are some limitations, however, can be very useful if firewall is blocking standard reverse shells.
 
