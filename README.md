@@ -85,34 +85,48 @@ postshell> list
 ║ 3  ║ 192.168.193.129 ║ DESKTOP-P5KACDB ║ jimothy ║ Windows 10 Pro ║ 10.0.19045       ║ 64-bit ║
 ║ 4  ║ 192.168.193.129 ║ DESKTOP-P5KACDB ║ system  ║ Windows 10 Pro ║ 10.0.19045       ║ 64-bit ║
 ╚════╩═════════════════╩═════════════════╩═════════╩════════════════╩══════════════════╩════════╝
+
+postshell> list 
+╔════╦═════════════╦═══════════╦════════╦══════════════════════════════╦════════════╦════════╗
+║ ID ║ IP          ║ HOSTNAME  ║ USER   ║ OS                           ║ VERSION    ║ ARCH   ║
+╠════╬═════════════╬═══════════╬════════╬══════════════════════════════╬════════════╬════════╣
+║ 1  ║ 172.16.12.5 ║ SKYWALKER ║ luke   ║ Windows 11 Pro               ║ 10.0.26100 ║ 64-bit ║
+║ 2  ║ 172.16.12.2 ║ WOOKIE    ║ chewie ║ Windows 11 Pro               ║ 10.0.26100 ║ 64-bit ║
+║ 3  ║ 172.16.12.4 ║ SOLO      ║ han    ║ Windows Server 2025 Standard ║ 10.0.26100 ║ 64-bit ║
+╚════╩═════════════╩═══════════╩════════╩══════════════════════════════╩════════════╩════════╝
 ```
 
 6. To connect to an active session
 ```
-postshell> select 3
-[jimothy@DESKTOP-P5KACDB]>
+postshell> select 1
+[luke@SKYWALKER]> 
 ```
 
 7. Execute commands, and wait for the client to GET the command, then POST the results
 ```
-[jimothy@DESKTOP-P5KACDB]> pwd
-C:\Users\jimothy\Downloads
+[luke@SKYWALKER]> pwd
+
+Path         
+----         
+C:\Users\Luke
+
 ```
   
 8. To background a session
 ```
-[jimothy@DESKTOP-P5KACDB]> background
+[luke@SKYWALKER]> background
 ```
 
 9. To kill the current session
 ```
-[jimothy@DESKTOP-P5KACDB]> die
+[chewie@WOOKIE]> die 
+[!] Sent die command to chewie@WOOKIE
 ```
 
 10. Kill an active session from the menu
 ```
-postshell> kill 3
-[!] Sent kill command to jimothy@DESKTOP-P5KACDB
+postshell> kill 1
+[!] Sent kill command to luke@SKYWALKER
 ```
 
 11. To kill all sessions, and exit POSTSHELL
