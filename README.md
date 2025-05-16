@@ -6,18 +6,36 @@
 ██║     ╚██████╔╝███████║   ██║   ███████║██║  ██║███████╗███████╗███████╗
 ╚═╝      ╚═════╝ ╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝
 ```
-Execute commands on clients using GET/POST requests. (Bypass Firewalls)
+Execute Commands on Clients via HTTP (Bypass Firewalls)
 
-There are some limitations, however, can be very useful if firewall is blocking standard reverse shells.
+PostShell allows remote command execution on clients through standard HTTP GET and POST requests. 
 
-How postshell works:
-  - POSTSHELL listens on a "USER SPECIFIED PORT"
-  - POSTSHELL generates web request scripts `(sh, py, ps1)` for clients
-  - POSTSHELL creates a directory called `tools/`, where it will place the "CLIENT SCRIPTS". `tools/` is a directory that can be downloaded from
-    - (EX: http://127.0.0.1/tools/127_0_0_1_80.sh) 
-  - Client scripts submit SYSTEM info using `POST` requests
-  - Client scripts will continue to `GET` commands from the POSTSHELL server, execute the commands, then `POST` results back to the server
-  - POSTSHELL keeps session logs for each client in `session_logs/`
+This technique can help bypass firewalls and network restrictions that block typical reverse shells.
+
+# Key Features:
+  - Leverages HTTP requests to communicate, avoiding detection by firewalls or IDS/IPS systems.
+  - Supports multiple client platforms (Bash, Python, PowerShell).
+  - Logs all client sessions and outputs.
+
+# How PostShell Works:
+## Server Setup:
+  - PostShell starts an HTTP server on a user-specified port.
+  - A tools/ directory is created to host auto-generated client scripts.
+## Client Script Generation:
+  - PostShell generates platform-specific client scripts:
+    - Bash (.sh)
+    - Python (.py)
+    - PowerShell (.ps1)
+  - These scripts are made accessible for download:
+    - Example: `http://<server_ip>:<port>/tools/192_168_1_5_4444.sh`
+## Client Behavior:
+  - The client script collects and submits system information via a POST request to the server.
+  - Then enters a loop where it:
+    - Sends GET requests to retrieve commands from the server.
+    - Executes the commands locally.
+    - Sends the command output back via POST.
+## Logging:
+  - All client interactions (commands and results) are saved in per-client logs under the session_logs/ directory.
 
 # Disclaimer
 This is only for testing purposes, not intended for anything illegal.
