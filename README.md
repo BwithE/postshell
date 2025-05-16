@@ -13,7 +13,7 @@ There are some limitations, however, can be very useful if firewall is blocking 
 How postshell works:
   - POSTSHELL listens on a "USER SPECIFIED PORT"
   - POSTSHELL generates web request scripts `(sh, py, ps1)` for clients
-  - POSTSHELL creates a directory called `tools/`, where it will place the "CLIENT SCRIPTS" and it's also a directory that can be downloaded from
+  - POSTSHELL creates a directory called `tools/`, where it will place the "CLIENT SCRIPTS". `tools/` is a directory that can be downloaded from
     - (EX: http://127.0.0.1/tools/127_0_0_1_80.sh) 
   - Client scripts submit SYSTEM info using `POST` requests
   - Client scripts will continue to `GET` commands from the POSTSHELL server, execute the commands, then `POST` results back to the server
