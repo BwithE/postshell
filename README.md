@@ -20,13 +20,13 @@ This technique can help bypass firewalls and network restrictions that block typ
 # How PostShell Works:
 ## Server Setup:
   - PostShell starts an HTTP server on a user-specified port.
-  - A tools/ directory is created to host auto-generated client scripts.
+  - A tools/ directory is created to host user generated client scripts.
 ## Client Script Generation:
-  - PostShell generates platform-specific client scripts:
+  - PostShell generates the following client scripts:
     - Bash (.sh)
     - Python (.py)
     - PowerShell (.ps1)
-  - These scripts are made accessible for download:
+  - These scripts are available for download/deployment:
     - Example: `http://<server_ip>:<port>/tools/192_168_1_5_4444.sh`
 ## Client Behavior:
   - The client script collects and submits system information via a POST request to the server.
@@ -35,7 +35,7 @@ This technique can help bypass firewalls and network restrictions that block typ
     - Executes the commands locally.
     - Sends the command output back via POST.
 ## Logging:
-  - All client interactions (commands and results) are saved in per-client logs under the session_logs/ directory.
+  - All client interactions (commands and results) are saved in logs under the session_logs/ directory.
 
 # Disclaimer
 This is only for testing purposes, not intended for anything illegal.
