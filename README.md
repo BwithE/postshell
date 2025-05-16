@@ -6,7 +6,7 @@
 ██║     ╚██████╔╝███████║   ██║   ███████║██║  ██║███████╗███████╗███████╗
 ╚═╝      ╚═════╝ ╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝
 ```
-Execute Commands on Clients via HTTP (Bypass Firewalls)
+Execute Commands on Clients with HTTP. (Bypass Firewalls)
 
 PostShell allows remote command execution on clients through standard HTTP GET and POST requests. 
 
