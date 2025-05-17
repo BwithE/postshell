@@ -27,7 +27,7 @@ This technique can help bypass firewalls and network restrictions that block typ
     - Python (.py)
     - PowerShell (.ps1)
   - These scripts are available for download/deployment:
-    - Example: `http://<server_ip>:<port>/tools/192_168_1_5_4444.sh`
+    - Example: `http://<server_ip>:<port>/tools/<client.script>`
 ## Client Behavior:
   - The client script collects and submits system information via a POST request to the server.
   - Then enters a loop where it:
