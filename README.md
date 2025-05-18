@@ -85,21 +85,34 @@ payload> options
 
 Current Payload Options:
 
+  NAME      : <NOT SET>
   LHOST     : 127.0.0.1
   LPORT     : 80
   PAYLOAD   : sh
   CHECKIN   : 1
 
-payload> set lhost 127.0.0.1
-[+] Set lhost to 127.0.0.1
-payload> set lport 80
-[+] Set lport to 80
-payload> set payload sh
-[+] Set payload to sh
-payload> set checkin 1
-[+] Set checkin to 1
+payload> set name client
+[+] Set 'name' to 'client'
+payload> set lhost 192.168.0.1
+[+] Set 'lhost' to '192.168.0.1'
+payload> set lport 81
+[+] Set 'lport' to '81'
+payload> set payload py
+[+] Set 'payload' to 'py'
+payload> set checkin 2
+[+] Set 'checkin' to '2'
+payload> options 
+
+Current Payload Options:
+
+  NAME      : client
+  LHOST     : 192.168.0.1
+  LPORT     : 81
+  PAYLOAD   : py
+  CHECKIN   : 2
+
 payload> generate 
-[+] Payload generated and saved as tools/127_0_0_1_80.sh
+[+] Payload generated and saved as 'tools/client.py'
 ```
 
 Transfer the client script
