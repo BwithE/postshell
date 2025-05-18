@@ -77,8 +77,8 @@ Payload Menu Commands:
 ```
 
 Generate a Client script that creates a directory called "tools" with the scripts
-    - This server also allows `GET` requests from `tools/`
-    - You can also store other tools needed (ex: winpeas, linpeas, sharphound, etc)
+  - This server also allows `GET` requests from `tools/`
+  - You can also store other tools needed (ex: winpeas, linpeas, sharphound, etc)
 ```
 postshell> payload 
 payload> options 
