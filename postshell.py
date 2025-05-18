@@ -244,7 +244,7 @@ def cli():
                             print(f"{RED}[!] No clients connected.{RESET}")
                             continue
 
-                        headers = ["ID", "IP", "HOSTNAME", "USER", "OS", "VERSION", "ARCH"]
+                        headers = ["ID", "IP", "USER", "HOSTNAME", "OS", "VERSION", "ARCH"]
                         data = []
                         sorted_clients = sorted(clients.items(), key=lambda item: item[1]["num_id"])
                         for cid, info in sorted_clients:
