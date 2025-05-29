@@ -209,7 +209,8 @@ postshell> exit
 
 # Logging
 ```
-cat session_logs/root@kali_127.0.0.1.log 
+kali@kali:~/Desktop/postshell$ cat session_logs/root@kali_127.0.0.1.log
+
 [2025-05-28 21:15:06] CMD: whoami
 [2025-05-28 21:15:06] RESULT:
 root
