@@ -206,3 +206,30 @@ Exit POSTSHELL
 postshell> exit 
 [!] Shutting down server and all sessions.
 ```
+
+# Logging
+```
+cat session_logs/root@kali_127.0.0.1.log 
+[2025-05-28 21:15:06] CMD: whoami
+[2025-05-28 21:15:06] RESULT:
+root
+
+[2025-05-28 21:15:08] CMD: hostname
+[2025-05-28 21:15:08] RESULT:
+kali
+
+[2025-05-28 21:15:42] CMD: pwd
+[2025-05-28 21:15:42] RESULT:
+/home/kali/Desktop/postshell
+
+[2025-05-28 21:15:43] CMD: ls
+[2025-05-28 21:15:43] RESULT:
+postshell.py
+README.md
+session_logs
+tools
+
+[2025-05-28 21:16:07] CMD: whoami
+[2025-05-28 21:16:07] RESULT:
+root
+```
