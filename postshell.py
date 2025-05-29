@@ -32,7 +32,7 @@ lock = threading.Lock()
 client_counter = 1
 client_id_map = {}
 
-MAIN_COMMANDS = ["list ", "select ", "payload ", "kill ", "killall", "exit ", "help ", "? "]
+MAIN_COMMANDS = ["list ", "select ", "payload ", "kill ", "killall ", "exit ", "help ", "? "]
 SESSION_COMMANDS = ["background ", "die "]
 
 selected_client = None
