@@ -97,7 +97,7 @@ Current Payload Options:
   CHECKIN   : 1
   KILLSWITCH: 60
 
-payload> set name callme
+payload> set name client
 [+] Set 'name' to 'client'
 payload> set lhost 192.168.0.2
 [+] Set 'lhost' to '192.168.0.2'
