@@ -346,27 +346,26 @@ def cli():
                         actual_cmd = parts[1].strip().strip('"').strip("'")
                         with lock:
                             client_aliases[selected_client][alias_name] = actual_cmd
-                        print(f"{GREEN}\n[+] Alias '{alias_name}' set to '{actual_cmd}' for session.{RESET}\n")
+                        print(f"{GREEN}[+] Alias '{alias_name}' set to '{actual_cmd}' for session.{RESET}")
                     else:
-                        print(f"{RED}\n[-] Invalid alias format. Use: alias ls='/bin/bash ls'{RESET}\n")
+                        print(f"{RED}[-] Invalid alias format. Use: alias ls='/bin/bash ls'{RESET}")
                 elif cmd.startswith("del alias "):
                     alias_name = cmd[len("del alias "):].strip()
                     with lock:
                         if alias_name in client_aliases[selected_client]:
                             del client_aliases[selected_client][alias_name]
-                            print(f"{GREEN}\n[+] Alias '{alias_name}' deleted for session.{RESET}\n")
+                            print(f"{GREEN}[+] Alias '{alias_name}' deleted for session.{RESET}")
                         else:
-                            print(f"{ORANGE}\n[-] Alias '{alias_name}' not found in this session.{RESET}\n")
+                            print(f"{ORANGE}[-] Alias '{alias_name}' not found in this session.{RESET}")
                 elif cmd == "list aliases":
                     with lock:
                         aliases = client_aliases.get(selected_client, {})
                         if aliases:
-                            print(f"{ORANGE}\n[+] Active aliases for this session:{RESET}")
+                            print(f"{ORANGE}[+] Active aliases for this session:{RESET}")
                             for name, value in aliases.items():
                                 print(f"  {GREEN}{name}{RESET} => {BLUE}{value}{RESET}")
                         else:
-                            print(f"{ORANGE}\n[*] No aliases set for this session.{RESET}")
-                        print(f"")
+                            print(f"{ORANGE}[*] No aliases set for this session.{RESET}")
                 elif cmd:
                     with lock:
                         # Substitute alias if present
