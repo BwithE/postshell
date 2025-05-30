@@ -212,6 +212,21 @@ postshell> exit
 [!] Shutting down server and all sessions.
 ```
 
+## Alias creation, execution, and deletion
+```
+[root@kali]> alias duh='echo whoopsie'
+[+] Alias 'duh' set to 'echo whoopsie' for session.
+[root@kali]> list aliases 
+[+] Active aliases for this session:
+  duh => echo whoopsie
+[root@kali]> duh
+whoopsie
+[root@kali]> del alias duh
+[+] Alias 'duh' deleted for session.
+[root@kali]> list aliases 
+[*] No aliases set for this session.
+```
+
 # Logging
 ```
 kali@kali:~/Desktop/postshell$ cat session_logs/root@kali_127.0.0.1.log
