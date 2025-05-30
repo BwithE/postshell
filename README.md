@@ -62,7 +62,7 @@ Menu Commands:
     list                 - List connected sessions
     select <id>          - Connect to a session
     kill <id>            - Terminate session
-    killall		           - Terminate all sessions
+    killall		 - Terminate all sessions
     exit                 - Exit the server
 Session Commands:
     alias                - Set an alias for the current session
