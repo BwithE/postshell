@@ -58,12 +58,16 @@ postshell> help
 
 Menu Commands:
     help | ?             - Show this menu
+    payload              - Payload generator menu
     list                 - List connected sessions
     select <id>          - Connect to a session
     kill <id>            - Terminate session
-    killall		 - Terminate all sessions
+    killall		           - Terminate all sessions
     exit                 - Exit the server
 Session Commands:
+    alias                - Set an alias for the current session
+    list aliases         - List all aliases for the current session
+    del alias            - Delete an alias for the current session
     background           - Background session
     die                  - Terminate session
 Payload Menu Commands:
