@@ -14,7 +14,7 @@ This technique can help bypass firewalls and network restrictions that block typ
 
 # Key Features:
   - Leverages HTTP requests to communicate, avoiding detection by firewalls or IDS/IPS systems.
-  - Supports multiple client platforms (Bash, Python, PowerShell).
+  - Supports multiple client platforms (Bash, Ash, Python, PowerShell and Exe).
   - Logs all client sessions and outputs.
 
 # How PostShell Works:
