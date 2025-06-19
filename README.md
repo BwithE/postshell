@@ -76,7 +76,7 @@ Payload Menu Commands:
     set name <name>      - Set CUSTOM script name | BLANK = DEFAULT
     set lhost <ip>       - Set the POSTSHELL IP address
     set lport <port>     - Set the POSTSHELL listening port
-    set payload <type>   - Set payload type (EX: bash, ash, py, ps1, exe)
+    set payload <type>   - Set payload type (EX: sh, py, ps1, exe)
     set checkin <sec>    - Set the check-in wait time (in seconds)
     set killswitch <sec> - Exit payload if offline for N seconds
     options              - Show current payload configuration
