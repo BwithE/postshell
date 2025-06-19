@@ -12,7 +12,7 @@ from collections import defaultdict
 import subprocess
 import getpass
 
-# requirements for dll generation
+# requirements for dll/exe generation
 # sudo apt install mingw-w64
 
 
