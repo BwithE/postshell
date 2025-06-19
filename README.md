@@ -99,7 +99,7 @@ Current Payload Options:
   NAME      : <NOT SET>
   LHOST     : 127.0.0.1
   LPORT     : 80
-  PAYLOAD   : bash
+  PAYLOAD   : sh
   CHECKIN   : 1
   KILLSWITCH: 60
 
