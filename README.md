@@ -24,7 +24,6 @@ This technique can help bypass firewalls and network restrictions that block typ
 ## Client Script Generation:
   - PostShell generates the following client scripts:
     - Bash (.sh)
-    - Ash (.sh)
     - Python (.py)
     - PowerShell (.ps1)
     - Executable (.exe)
