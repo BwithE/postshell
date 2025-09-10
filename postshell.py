@@ -414,7 +414,7 @@ payload_settings = {
     "lhost": "127.0.0.1", # the ip your listening on
     "lport": "80", # your listening port
     "payload": "sh", # sh, py, ps1, exe
-    "checkin": "1", # time between curl requests for the victim
+    "checkin": "1", # time between curl requests for the client
     "killswitch": "60"  # default 60 seconds
 }
 
